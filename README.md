@@ -1,2 +1,0 @@
-# ISD-Picking-Scheduler
- 

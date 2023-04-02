@@ -17,16 +17,24 @@ public class JSONReader {
     static int pickersNumber;
     static LocalTime startTime;
     static LocalTime endTime;
-    public void readOrders () {
+    String pathOrders;
+    String pathStore;
+
+    JSONReader(String pathS, String pathO) {
+        pathStore = pathS;
+        pathOrders = pathO;
+    }
+
+    public void readOrders() {
         //JSON parser object to parse read file
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("C:\\Users\\stryc\\Documents\\Ocado\\src\\orders.json")) {
+        try (FileReader reader = new FileReader(pathOrders)) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
             JSONArray orders = (JSONArray) obj;
 
             //Filling the Array with orders
-            for (int i=0; i<orders.size(); i++){
+            for (int i = 0; i < orders.size(); i++) {
                 JSONObject tmp = (JSONObject) orders.get(i);
 
                 String pickingTime_tmp = (String) tmp.get("pickingTime");
@@ -50,19 +58,18 @@ public class JSONReader {
         }
     }
 
-    public void readPickers () {
+    public void readPickers() {
         JSONParser jsonParser = new JSONParser();
-        try (FileReader reader = new FileReader("C:\\Users\\stryc\\Documents\\Ocado\\src\\store.json")) {
+        try (FileReader reader = new FileReader(pathStore)) {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
-            JSONObject jsonObj = (JSONObject)obj;
-            JSONArray pickers = (JSONArray)jsonObj.get("pickers");
+            JSONObject jsonObj = (JSONObject) obj;
+            JSONArray pickers = (JSONArray) jsonObj.get("pickers");
             pickersNumber = pickers.size();
-            for (int i=0; i<pickersNumber; i++){
+            for (int i = 0; i < pickersNumber; i++) {
 
                 Array_pickers.add(new Picker());
                 Array_pickers.get(i).pickerId = (String) pickers.get(i);
-                System.out.println(Array_pickers.get(0).readyToWork);
             }
             startTime = LocalTime.parse((String) jsonObj.get("pickingStartTime"));
             endTime = LocalTime.parse((String) jsonObj.get("pickingEndTime"));
@@ -75,15 +82,4 @@ public class JSONReader {
             e.printStackTrace();
         }
     }
-
-
-
-    public void printPickers () {
-        System.out.println(pickersNumber);
-    }
-    public void printTime () {
-        System.out.println("Start of the work: " + startTime);
-        System.out.println("End of the work: " + endTime);
-    }
-
 }

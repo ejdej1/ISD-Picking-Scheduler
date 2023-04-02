@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.time.LocalTime;
 import java.util.ArrayList;
 
@@ -6,15 +5,14 @@ public class Scheduler {
     LocalTime pickingStartTime;
     LocalTime pickingEndTime;
     ArrayList<Order> Array_orders;
-    ArrayList<Picker> Array_Pickers = new ArrayList<Picker>();
-    ArrayList<String> schedule = new ArrayList<>();
+    ArrayList<Picker> Array_Pickers;
     LocalTime clock;
     int iterator = 0;
 
-    Scheduler(){
+    Scheduler(String pathStore, String pathOrders){
         //Creating Reader object
         //Getting information from JSONReader
-        JSONReader reader_json = new JSONReader();
+        JSONReader reader_json = new JSONReader(pathStore, pathOrders);
         reader_json.readOrders();
         reader_json.readPickers();
         Array_orders = reader_json.Array_orders;
@@ -32,19 +30,15 @@ public class Scheduler {
 
     public void createSchedule () {
 
-        while (clock.isBefore(pickingEndTime)){
+        while (clock.isBefore(pickingEndTime) && Array_orders.size() != 0){
 
-            if (Array_orders.get(0).completeBy.isAfter(clock.plusMinutes(Array_orders.get(0).pickingTime))) {Array_orders.remove(0);}
+            //Delete orders that cannot be completed in time
+            deleteOrders();
 
             //Checking if there is any picker who can start picking
             //Picker starts picking if he is available
-            for(Picker picker: Array_Pickers){
-                if (checkAviability(picker, Array_orders.get(0))) {
-                    picker.readyToWork.plusMinutes(Array_orders.get(0).pickingTime);
-                    System.out.println(picker.pickerId + " " + Array_orders.get(0).orderId + " " + clock);
-                    Array_orders.remove(0);
-                }
-            }
+            assignPicker();
+
             clock = clock.plusMinutes(1);
         }
     }
@@ -59,10 +53,42 @@ public class Scheduler {
         }
     }
 
-    //Checking the aviability of Picker
-    private boolean checkAviability (Picker picker, Order order) {
-        if (picker.readyToWork.compareTo(order.completeBy) > 0 ) { return false;}
-        else{return true;}
+    //Checking the availability of Picker
+    public boolean checkAvailability (Picker picker, Order order) {
+        return !(picker.readyToWork.isAfter(order.completeBy));
+    }
+    //Finding the picker that will be at the earliest
+    public LocalTime bestPicker (ArrayList<Picker> pickers) {
+        LocalTime time;
+        Picker bestPicker = pickers.get(0);
+        for (Picker el: pickers){
+            if (el.readyToWork.isBefore(bestPicker.readyToWork)){
+                bestPicker = el;
+            }
+        }
+
+        time = bestPicker.readyToWork;
+        return time;
+    }
+
+    public void deleteOrders(){
+        if (Array_orders.get(0).completeBy.isBefore(bestPicker(Array_Pickers).plusMinutes(Array_orders.get(0).pickingTime))) {
+            System.out.println(Array_orders.get(0).completeBy + " |||||| " +bestPicker(Array_Pickers).plusMinutes(Array_orders.get(0).pickingTime));
+            Array_orders.remove(0);
+            ;}
+    }
+
+    public void assignPicker(){
+        for(Picker picker: Array_Pickers){
+
+            if (Array_orders.size() == 0) {break;}
+            if (checkAvailability(picker, Array_orders.get(0)) && !clock.isBefore(picker.readyToWork)) {
+
+                picker.readyToWork = picker.readyToWork.plusMinutes(Array_orders.get(0).pickingTime);
+                System.out.println(picker.pickerId + " " + Array_orders.get(0).orderId + " " + clock);
+                Array_orders.remove(0);
+            }
+        }
     }
 
 }

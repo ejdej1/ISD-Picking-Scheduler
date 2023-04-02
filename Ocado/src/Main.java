@@ -10,7 +10,9 @@ import org.json.simple.parser.ParseException;
 public class Main {
 
     public static void main(String[] args) {
-        Scheduler ocado = new Scheduler();
+        String pathStore = args[0];
+        String pathOrder = args[1];
+        Scheduler ocado = new Scheduler(pathStore, pathOrder);
         ocado.createSchedule();
 
 

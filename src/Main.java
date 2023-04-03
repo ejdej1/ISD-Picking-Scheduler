@@ -8,24 +8,14 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Main {
-    @SuppressWarnings("unchecked")
+
     public static void main(String[] args) {
-        //JSON parser object to parse read file
-        JSONParser jsonParser = new JSONParser();
+        String pathStore = args[0];
+        String pathOrder = args[1];
+        Scheduler ocado = new Scheduler(pathStore, pathOrder);
+        ocado.createSchedule();
 
-        try (FileReader reader = new FileReader("C:\\Users\\stryc\\Documents\\Ocado\\src\\orders.json")) {
-            //Read JSON file
-            Object obj = jsonParser.parse(reader);
 
-            JSONArray employeeList = (JSONArray) obj;
-            System.out.println(employeeList);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 }
